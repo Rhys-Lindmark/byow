@@ -61,7 +61,84 @@ function cleanValue(value: string) {
   return value.trim().replace(/^['“"]|['”"]$/g, '').replace(/[.!]$/, '').trim();
 }
 
-export function buildPatch(prompt: string): { patch: Partial<SiteState>; message: string; reset?: boolean } {
+const creativePalettes = [
+  { background: '#ffe45c', foreground: '#28220d', accent: '#638c2c', highlight: '#fff4a8' },
+  { background: '#dcecff', foreground: '#17233d', accent: '#3457d5', highlight: '#ff9ec4' },
+  { background: '#f2d7e8', foreground: '#351b32', accent: '#b93672', highlight: '#ffd55c' },
+  { background: '#d9ead3', foreground: '#163322', accent: '#2e7d4f', highlight: '#f2c94c' },
+  { background: '#201b33', foreground: '#fff5d6', accent: '#ff6f61', highlight: '#7ef0c1' },
+];
+
+function stablePalette(value: string) {
+  const score = [...value].reduce((total, character) => total + character.charCodeAt(0), 0);
+  return creativePalettes[score % creativePalettes.length];
+}
+
+function inferCreativeDirection(text: string) {
+  const patterns = [
+    /(?:make|turn) (?:the )?(?:page|site|website|it|this) (?:feel|look) like\s+(.+)/i,
+    /(?:make|turn) (?:the )?(?:page|site|website|it|this) (?:all|more|very|super)\s+(.+)/i,
+    /(?:make|turn) (?:the )?(?:page|site|website|it|this)\s+(.+)/i,
+    /(?:go|make it) full\s+(.+)/i,
+    /(?:more|all)\s+(.+)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern)?.[1];
+    if (match) return cleanValue(match.replace(/^(?:about|into)\s+/i, ''));
+  }
+  return cleanValue(text.replace(/^(?:please|could you|can you)\s+/i, ''));
+}
+
+function creativePatch(direction: string): Partial<SiteState> {
+  const subject = direction.replace(/^(?:a |an |the )/i, '').trim();
+  const lower = subject.toLowerCase();
+  const palette = stablePalette(lower);
+  const base: Partial<SiteState> = {
+    ...palette,
+    kicker: 'CURRENT OBSESSION',
+    title: subject.toUpperCase(),
+    subtitle: `A page remixed around ${lower}. Keep pushing it—the next instruction can change everything again.`,
+    cards: [
+      { title: 'LOOK CLOSER', body: `Notice what gets interesting when ${lower} takes over the whole page.` },
+      { title: 'PUSH THE IDEA', body: `Make ${lower} louder, stranger, calmer, sharper, or more specific.` },
+      { title: 'BREAK THE DRAFT', body: 'Give the builder a contradictory direction and see what survives.' },
+    ],
+    showOrb: true,
+    showButton: false,
+    gradient: true,
+    treatment: 'soft',
+  };
+
+  if (/banana|plantain|tropical fruit/.test(lower)) {
+    return {
+      ...base,
+      background: '#ffe45c', foreground: '#28220d', accent: '#5e7f28', highlight: '#fff3a6',
+      kicker: 'RIPE / READY / REMIXABLE', title: 'GO FULL\nBANANAS.',
+      subtitle: 'A suspiciously ripe corner of the internet. Yellow everywhere. Seriousness nowhere.',
+      buttonLabel: 'PEEL HERE', showButton: true, align: 'center', font: 'sans', treatment: 'soft',
+      cards: [
+        { title: 'THE BUNCH', body: 'One banana is a snack. A whole page of them is a creative direction.' },
+        { title: 'PEAK RIPENESS', body: 'Bright yellow, a little green, and exactly zero beige restraint.' },
+        { title: 'BANANA SPLIT', body: 'Change one instruction and send the entire page somewhere new.' },
+      ],
+    };
+  }
+  if (/space|cosmic|galaxy|lunar|moon|planet|sci-fi/.test(lower)) {
+    return { ...base, background: '#0a1026', foreground: '#eef3ff', accent: '#7897ff', highlight: '#d7ff67', font: 'mono', treatment: 'minimal' };
+  }
+  if (/luxury|hotel|fashion|elegant|romantic|old world/.test(lower)) {
+    return { ...base, background: '#ede2ce', foreground: '#2e221b', accent: '#8e3328', highlight: '#d6b66d', font: 'serif', treatment: 'editorial' };
+  }
+  if (/punk|zine|chaos|loud|angry|grunge/.test(lower)) {
+    return { ...base, background: '#f1eee3', foreground: '#111111', accent: '#ff2b2b', highlight: '#dfff2f', font: 'mono', treatment: 'brutalist', align: 'left', gradient: false };
+  }
+  if (/calm|quiet|zen|meditat|spa|gentle/.test(lower)) {
+    return { ...base, background: '#e7eee9', foreground: '#20352b', accent: '#6b8f7c', highlight: '#d7c9a7', font: 'serif', treatment: 'minimal', gradient: false };
+  }
+  return base;
+}
+
+export function buildPatch(prompt: string, current: SiteState = initialSite): { patch: Partial<SiteState>; message: string; reset?: boolean } {
   const text = prompt.trim();
   const lower = text.toLowerCase();
   if (/^(reset|start over|restore default)/.test(lower)) {
@@ -138,7 +215,7 @@ export function buildPatch(prompt: string): { patch: Partial<SiteState>; message
   const section = text.match(/add (?:a |another )?(?:card|section)(?: called| for| about|:)?\s+["“']?([^"”']+)["”']?/i)?.[1];
   if (section) {
     const cleaned = cleanValue(section);
-    patch.cards = [{ title: cleaned.toUpperCase(), body: `A new space for ${cleaned.toLowerCase()}. Keep shaping it in the chat.` }];
+    patch.cards = [...current.cards.slice(0, 5), { title: cleaned.toUpperCase(), body: `A new space for ${cleaned.toLowerCase()}. Keep shaping it in the chat.` }];
     changes.push(`added a “${cleaned}” section`);
   }
   if (/remove (?:the )?(?:cards|sections)|hide (?:the )?(?:cards|sections)|clear the page/.test(lower)) { patch.cards = []; changes.push('cleared the supporting sections'); }
@@ -153,7 +230,11 @@ export function buildPatch(prompt: string): { patch: Partial<SiteState>; message
   }
 
   if (!changes.length) {
-    return { patch: {}, message: 'I understood the direction, but I need one concrete handle—try a color, headline, subject, layout, font, button, or section.' };
+    const direction = inferCreativeDirection(text);
+    return {
+      patch: creativePatch(direction),
+      message: `I took “${direction}” as the creative direction and rebuilt the whole page around it. Keep it, undo it, or push it further.`,
+    };
   }
   return { patch, message: `Done — ${changes.join(', ')}.` };
 }

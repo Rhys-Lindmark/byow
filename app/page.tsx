@@ -42,7 +42,7 @@ export default function Home() {
       const response = await fetch(`${routeBase}/api/build`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt: instruction }),
+        body: JSON.stringify({ prompt: instruction, site }),
       });
       const result = await response.json() as { patch?: Partial<SiteState>; message?: string; error?: string };
       if (!response.ok || !result.patch) throw new Error(result.error ?? 'The builder hit a snag.');
