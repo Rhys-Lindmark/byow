@@ -76,10 +76,13 @@ export default function Home() {
     '--site-accent': site.accent,
     '--site-highlight': site.highlight,
   } as CSSProperties;
+  const canvasStyle = site.backgroundImage ? {
+    backgroundImage: `linear-gradient(90deg, rgb(0 0 0 / 64%) 0%, rgb(0 0 0 / 34%) 62%, rgb(0 0 0 / 48%) 100%), url("${site.backgroundImage}")`,
+  } : undefined;
 
   return (
     <main className={`byow-shell font-${site.font} align-${site.align} treatment-${site.treatment} ${site.gradient ? 'has-gradient' : ''}`} style={variables}>
-      <section className="draft-canvas">
+      <section className={`draft-canvas ${site.backgroundImage ? 'has-photo-background' : ''}`} style={canvasStyle}>
         {site.showOrb ? <span aria-hidden="true" className="canvas-orb" /> : null}
         <div className="canvas-content">
           <p className="draft-kicker">{site.kicker}</p>
@@ -92,6 +95,9 @@ export default function Home() {
             </div>
           ) : null}
         </div>
+        {site.backgroundSourceLabel && site.backgroundSourceUrl ? (
+          <a className="background-credit" href={site.backgroundSourceUrl} rel="noreferrer" target="_blank">Background: {site.backgroundSourceLabel}</a>
+        ) : null}
       </section>
 
       <aside className="builder-chat" aria-label="BYOW builder">

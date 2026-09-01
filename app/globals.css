@@ -9,6 +9,9 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .byow-shell { min-height: 100svh; color: var(--site-fg); background: var(--site-bg); transition: color .45s ease, background .45s ease; }
 .draft-canvas { min-height: 100svh; padding: clamp(28px, 6vw, 88px); padding-bottom: 300px; position: relative; overflow: hidden; }
+.has-photo-background { background-position: center; background-size: cover; background-attachment: fixed; }
+.has-photo-background .draft-grid article { background: rgb(12 12 12 / 70%); backdrop-filter: blur(8px); }
+.background-credit { position: absolute; z-index: 2; left: clamp(28px, 6vw, 88px); bottom: 28px; max-width: calc(100% - 470px); color: inherit; font: 700 9px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; text-transform: uppercase; text-underline-offset: 3px; opacity: .78; }
 .has-gradient .draft-canvas { background: linear-gradient(135deg, var(--site-bg) 20%, color-mix(in srgb, var(--site-bg) 70%, var(--site-accent))); }
 .canvas-orb { position: absolute; width: 34vw; height: 34vw; min-width: 260px; min-height: 260px; border-radius: 999px; background: var(--site-highlight); right: -8vw; top: -12vw; z-index: 0; transition: background .45s ease, transform .6s ease; }
 .canvas-content { position: relative; z-index: 1; }
@@ -73,5 +76,7 @@ h1 span:last-child { color: var(--site-accent); }
   .draft-grid strong { margin-top: 26px; }
   .builder-chat { left: 12px; right: 12px; bottom: 12px; width: auto; box-shadow: 6px 6px 0 #171611; }
   .chat-history { max-height: 190px; }
+  .has-photo-background { background-attachment: scroll; }
+  .background-credit { left: 18px; bottom: 326px; max-width: calc(100% - 36px); }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition: none !important; } }

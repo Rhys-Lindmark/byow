@@ -16,6 +16,9 @@ export type SiteState = {
   showOrb: boolean;
   showButton: boolean;
   gradient: boolean;
+  backgroundImage: string | null;
+  backgroundSourceLabel: string | null;
+  backgroundSourceUrl: string | null;
 };
 
 export const initialSite: SiteState = {
@@ -33,6 +36,9 @@ export const initialSite: SiteState = {
   showOrb: true,
   showButton: false,
   gradient: false,
+  backgroundImage: null,
+  backgroundSourceLabel: null,
+  backgroundSourceUrl: null,
   cards: [
     { title: 'CHANGE THE FEEL', body: '“Make this warmer, stranger, and less polite.”' },
     { title: 'CHANGE THE STORY', body: '“Turn this into a field guide for urban moss.”' },
@@ -106,6 +112,9 @@ function creativePatch(direction: string): Partial<SiteState> {
     showOrb: true,
     showButton: false,
     gradient: true,
+    backgroundImage: null,
+    backgroundSourceLabel: null,
+    backgroundSourceUrl: null,
     treatment: 'soft',
   };
 
@@ -151,7 +160,10 @@ export function buildPatch(prompt: string, current: SiteState = initialSite): { 
   const foreground = mentionedColor(text, /(?:text|type)(?: color)?(?: to| be|:)?\s+([^,;.]+)/i);
   const accent = mentionedColor(text, /accent(?: color)?(?: to| be|:)?\s+([^,;.]+)/i);
 
-  if (background) { patch.background = background; changes.push('changed the background'); }
+  if (background) {
+    Object.assign(patch, { background, backgroundImage: null, backgroundSourceLabel: null, backgroundSourceUrl: null });
+    changes.push('changed the background');
+  }
   if (foreground) { patch.foreground = foreground; changes.push('changed the text color'); }
   if (accent) { patch.accent = accent; changes.push('changed the accent'); }
 
@@ -223,6 +235,10 @@ export function buildPatch(prompt: string, current: SiteState = initialSite): { 
   if (/show (?:the )?(?:circle|orb|shape)/.test(lower)) { patch.showOrb = true; changes.push('restored the background shape'); }
   if (/hide (?:the )?button|remove (?:the )?button/.test(lower)) { patch.showButton = false; changes.push('removed the button'); }
   if (/show (?:the )?button|add (?:a )?button/.test(lower) && !button) { patch.showButton = true; changes.push('added a button'); }
+  if (/(?:remove|clear|hide) (?:the )?(?:background image|background photo|photo background)/.test(lower)) {
+    Object.assign(patch, { backgroundImage: null, backgroundSourceLabel: null, backgroundSourceUrl: null });
+    changes.push('removed the background image');
+  }
 
   if (/surprise me|randomize|make it weird/.test(lower)) {
     Object.assign(patch, { background: '#25194a', foreground: '#f9efc7', accent: '#ff5c8a', highlight: '#52ffc8', font: 'serif', align: 'center', treatment: 'soft', gradient: true });
