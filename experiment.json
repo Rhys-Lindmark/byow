@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "name": "BYOW",
+  "stage": "prototype",
+  "pitch": "Tell one permanent chat what to change, and watch the rest of the website continuously rebuild itself.",
+  "owner": "Rhys Lindmark",
+  "url": "https://ai.rhyslindmark.com/byow",
+  "repo": "https://github.com/Rhys-Lindmark/byow",
+  "metrics": null,
+  "evidence": [
+    "Prompt-driven palette, type, layout, content, and section changes work in the first public prototype.",
+    "Visitor drafts persist locally and can be undone or reset."
+  ],
+  "next_review_date": "2026-09-08"
+}
