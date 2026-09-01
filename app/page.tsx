@@ -3,6 +3,7 @@
 import { ArrowUp, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { type CSSProperties, type FormEvent, useEffect, useRef, useState } from 'react';
 import { initialSite, type SiteState } from '@/lib/builder';
+import { EffectLayer, WildWidget } from './wild-widget';
 
 type Message = { id: number; role: 'builder' | 'you'; text: string };
 const firstMessage: Message = { id: 1, role: 'builder', text: 'Hey. I can rebuild everything you see here. What should we make?' };
@@ -81,13 +82,15 @@ export default function Home() {
   } : undefined;
 
   return (
-    <main className={`byow-shell font-${site.font} align-${site.align} treatment-${site.treatment} ${site.gradient ? 'has-gradient' : ''}`} style={variables}>
+    <main className={`byow-shell font-${site.font} align-${site.align} treatment-${site.treatment} layout-${site.layout} effect-${site.effect} mode-${site.mode ?? 'custom'} ${site.gradient ? 'has-gradient' : ''}`} style={variables}>
       <section className={`draft-canvas ${site.backgroundImage ? 'has-photo-background' : ''}`} style={canvasStyle}>
+        <EffectLayer effect={site.effect} />
         {site.showOrb ? <span aria-hidden="true" className="canvas-orb" /> : null}
         <div className="canvas-content">
           <p className="draft-kicker">{site.kicker}</p>
           <h1>{site.title.split('\n').map((line, index) => <span key={`${line}-${index}`}>{line}</span>)}</h1>
           <p className="draft-copy">{site.subtitle}</p>
+          <WildWidget kind={site.widget} onSelfDestruct={()=>{setHistory(items=>[...items.slice(-9),site]);setSite({...initialSite,title:'',subtitle:'',kicker:'',cards:[],layout:'blank',mode:'blank-slate'})}} />
           {site.showButton ? <button className="canvas-button" type="button">{site.buttonLabel}</button> : null}
           {site.cards.length ? (
             <div className="draft-grid" aria-label="Page sections">

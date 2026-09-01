@@ -1,3 +1,5 @@
+import { findWildIdea, patchForWildIdea, wildIdeas } from './ideas.ts';
+
 export type Card = { title: string; body: string };
 
 export type SiteState = {
@@ -19,6 +21,10 @@ export type SiteState = {
   backgroundImage: string | null;
   backgroundSourceLabel: string | null;
   backgroundSourceUrl: string | null;
+  layout: import('./ideas.ts').WildLayout;
+  effect: import('./ideas.ts').WildEffect;
+  widget: import('./ideas.ts').WildWidget;
+  mode: string | null;
 };
 
 export const initialSite: SiteState = {
@@ -39,6 +45,10 @@ export const initialSite: SiteState = {
   backgroundImage: null,
   backgroundSourceLabel: null,
   backgroundSourceUrl: null,
+  layout: 'hero',
+  effect: 'none',
+  widget: 'none',
+  mode: null,
   cards: [
     { title: 'CHANGE THE FEEL', body: '“Make this warmer, stranger, and less polite.”' },
     { title: 'CHANGE THE STORY', body: '“Turn this into a field guide for urban moss.”' },
@@ -153,6 +163,9 @@ export function buildPatch(prompt: string, current: SiteState = initialSite): { 
   if (/^(reset|start over|restore default)/.test(lower)) {
     return { patch: initialSite, reset: true, message: 'Reset the canvas to the original BYOW draft.' };
   }
+
+  const wildIdea = findWildIdea(text);
+  if (wildIdea) return { patch: patchForWildIdea(wildIdea), message: `Built wild idea ${String(wildIdeas.indexOf(wildIdea)+1).padStart(3,'0')}/100: ${wildIdea.label}. It is live, reversible, and safe to combine with another instruction.` };
 
   const patch: Partial<SiteState> = {};
   const changes: string[] = [];

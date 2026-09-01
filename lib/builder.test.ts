@@ -5,10 +5,10 @@ import { buildPatch, initialSite } from './builder.ts';
 test('open-ended banana direction becomes a coherent full-page remix', () => {
   const result = buildPatch('make the page all bananas');
   assert.equal(result.patch.title, 'GO FULL\nBANANAS.');
-  assert.equal(result.patch.background, '#ffe45c');
-  assert.equal(result.patch.showButton, true);
+  assert.equal(result.patch.mode, 'bananas');
+  assert.equal(result.patch.effect, 'confetti');
   assert.equal(result.patch.cards?.length, 3);
-  assert.match(result.message, /creative direction/i);
+  assert.match(result.message, /wild idea 021\/100/i);
   assert.doesNotMatch(result.message, /need one concrete handle/i);
 });
 

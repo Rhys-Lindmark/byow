@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
-    "test:builder": "node --experimental-strip-types --test lib/builder.test.ts lib/wikipedia.test.ts",
+    "test:builder": "node --experimental-strip-types --test lib/builder.test.ts lib/ideas.test.ts lib/wikipedia.test.ts",
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",
     "format": "oxfmt"
